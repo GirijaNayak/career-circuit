@@ -1,0 +1,177 @@
+import { InterviewModule } from '../types';
+
+export const SEED_INTERVIEW_MODULES: InterviewModule[] = [
+  {
+    key: 'algorithms-ds',
+    title: 'Algorithms & Data Structures',
+    category: 'Technical Fundamentals',
+    learningObjective: 'Master systematic problem breakdown, edge-case enumeration, and tight time/space complexity justification under live interview constraints.',
+    estimatedMinutes: 60,
+    recommendedSkills: ['Algorithms', 'Data Structures', 'Complexity Analysis'],
+    recommendedFollowUpDrillSkill: 'Algorithms',
+    prompts: [
+      {
+        id: 'algo-p1',
+        title: 'Streaming Median with Dynamic Inputs',
+        scenario: 'You are designing an in-memory analytics component that continuously ingests numbers from an IoT sensor stream and must return the running median at any moment.',
+        challenge: 'Formulate an optimal approach to maintain the median in O(1) time per query and O(log N) time per insertion. Explain the invariant that balances your two underlying heaps.',
+        rubric: [
+          { criterion: 'Dual-heap balance invariant', weight: '35%', description: 'Clearly explains maintaining max-heap for lower half and min-heap for upper half with size difference <= 1.' },
+          { criterion: 'Complexity derivation', weight: '35%', description: 'Accurately proves O(log N) insertion rebalancing and O(1) peek.' },
+          { criterion: 'Edge handling', weight: '30%', description: 'Considers empty stream, even count vs odd count median calculation, and duplicate entries.' },
+        ],
+        sampleSolutionOutline: 'Maintain two priority queues: `max_heap` storing the smaller half of numbers and `min_heap` storing the larger half. Invariant: `len(max_heap) >= len(min_heap)` and `len(max_heap) - len(min_heap) <= 1`. When inserting, compare against roots and rebalance. Median is top of max_heap (odd) or average of both tops (even).',
+      },
+      {
+        id: 'algo-p2',
+        title: 'Cycle Detection and Start Node in Directed Graph',
+        scenario: 'A distributed package manager needs to detect dependency deadlocks and isolate the cyclic dependency chain.',
+        challenge: 'Explain both Kahn’s Topological Sort (in-degree BFS) and 3-color DFS (White/Gray/Black). Compare their diagnostic utility for printing the exact cycle path.',
+        rubric: [
+          { criterion: 'Three-state DFS comprehension', weight: '40%', description: 'Accurately explains unvisited, currently in recursion stack (back edge / cycle), and fully processed.' },
+          { criterion: 'Kahn algorithm comparison', weight: '30%', description: 'Contrasts in-degree queue behavior when cycles exist (items remaining in degree > 0).' },
+          { criterion: 'Cycle path reconstruction', weight: '30%', description: 'Explains how parent pointers reconstruct the actual cyclic path rather than merely returning a boolean.' },
+        ],
+        sampleSolutionOutline: 'In 3-color DFS, encountering a Gray node identifies a back edge forming a cycle. Maintain an array of parent pointers or recursion stack snapshot to backtrack and output the cyclic cycle sequence.',
+      },
+    ],
+  },
+  {
+    key: 'system-design',
+    title: 'System Design & High-Level Architecture',
+    category: 'Architecture',
+    learningObjective: 'Structure open-ended system design discussions: scoping functional/non-functional requirements, back-of-the-envelope estimation, API contracts, database schema, and resilience strategies.',
+    estimatedMinutes: 75,
+    recommendedSkills: ['System Design', 'Distributed Systems'],
+    recommendedFollowUpDrillSkill: 'System Design',
+    prompts: [
+      {
+        id: 'sd-p1',
+        title: 'Design a Distributed Rate Limiter',
+        scenario: 'An API gateway receiving 500,000 requests/sec across 4 geographic regions needs to prevent abusive client spam while maintaining sub-millisecond overhead.',
+        challenge: 'Compare Token Bucket vs Sliding Window Counter. Address race conditions in Redis clusters (using Lua scripts or atomics) and explain local in-memory tiering to reduce network roundtrips.',
+        rubric: [
+          { criterion: 'Algorithm selection & trade-offs', weight: '30%', description: 'Justifies sliding window counter or token bucket with memory vs accuracy trade-offs.' },
+          { criterion: 'Distributed synchronization', weight: '40%', description: 'Explains Redis Lua scripting for atomic check-and-decrement to prevent concurrent race conditions.' },
+          { criterion: 'Multi-region latency & failure modes', weight: '30%', description: 'Discusses local caching with asynchronous reconciliation or fallback behavior when Redis is unreachable.' },
+        ],
+        sampleSolutionOutline: 'Use Redis cluster with hash tags `{client_id}` to ensure keys map to identical shards. Execute an atomic Lua script that increments sliding window timestamps and removes expired events. To minimize latency, employ a 2-tier architecture: local in-process token cache for high-frequency callers, sync batch to Redis periodically.',
+      },
+    ],
+  },
+  {
+    key: 'low-level-design',
+    title: 'Low-Level Design (LLD) & Object-Oriented Modeling',
+    category: 'Architecture',
+    learningObjective: 'Apply SOLID principles, design patterns (Strategy, Factory, Observer), and clean class encapsulation for modular, testable software components.',
+    estimatedMinutes: 60,
+    recommendedSkills: ['Software Engineering Principles', 'OOP'],
+    recommendedFollowUpDrillSkill: 'Debugging',
+    prompts: [
+      {
+        id: 'lld-p1',
+        title: 'Design an Extensible Parking Lot System',
+        scenario: 'Model a multi-level parking facility that accommodates multiple vehicle types (Motorcycles, Cars, Electric Vehicles with charging, Trucks) and dynamic pricing strategies.',
+        challenge: 'Define the class hierarchy, interfaces, and design patterns. How do you apply the Strategy Pattern for fee calculation and avoid God Objects?',
+        rubric: [
+          { criterion: 'Class hierarchy & Single Responsibility', weight: '35%', description: 'Separates Vehicle, ParkingSpot, Level, ParkingManager, and PaymentProcessor.' },
+          { criterion: 'Design Pattern application', weight: '35%', description: 'Applies Strategy pattern for pricing (Hourly, Flat, EV surcharge) and Factory for vehicle/spot instantiation.' },
+          { criterion: 'Concurrency & Thread Safety', weight: '30%', description: 'Explains spot allocation concurrency guards (locks or atomic status flags).' },
+        ],
+        sampleSolutionOutline: 'Define abstract `Vehicle` and subclasses. `ParkingSpot` has spot size and status. `FeeStrategy` interface with `FlatRateStrategy`, `PeakHourStrategy`, and `EVRateDecorator`. `ParkingFloor` manages spot lists. Spot allocation uses synchronized blocks or `ReentrantLock` per floor.',
+      },
+    ],
+  },
+  {
+    key: 'operating-systems',
+    title: 'Operating Systems & Concurrency',
+    category: 'Systems Fundamentals',
+    learningObjective: 'Demonstrate deep understanding of processes vs threads, virtual memory, paging, CPU scheduling, synchronization primitives (mutex, semaphore, condition variables), and deadlocks.',
+    estimatedMinutes: 50,
+    recommendedSkills: ['Operating Systems', 'Concurrency'],
+    recommendedFollowUpDrillSkill: 'Concurrency',
+    prompts: [
+      {
+        id: 'os-p1',
+        title: 'Deadlock Conditions and Resolution',
+        scenario: 'A multi-threaded server application experiences intermittent worker thread freezes under high traffic loads.',
+        challenge: 'Enumerate Coffman’s 4 conditions for deadlock. Propose how lock ordering (hierarchy) or `try_lock` with timeout breaks the circular wait condition.',
+        rubric: [
+          { criterion: 'Coffman conditions articulation', weight: '40%', description: 'Identifies Mutual Exclusion, Hold and Wait, No Preemption, and Circular Wait.' },
+          { criterion: 'Prevention mechanisms', weight: '40%', description: 'Explains strict global resource ordering (lock ordering) to mathematically eliminate circular wait.' },
+          { criterion: 'Detection & Recovery', weight: '20%', description: 'Discusses resource allocation graphs and thread preemption/termination strategies.' },
+        ],
+        sampleSolutionOutline: 'Deadlock requires: 1. Mutual exclusion, 2. Hold and wait, 3. No preemption, 4. Circular wait. Breaking circular wait is most practical in application code: enforce a strict global order on mutex acquisitions (e.g., always acquire Lock A before Lock B based on resource ID). Alternatively, use `pthread_mutex_timedlock` or `try_lock` with exponential backoff.',
+      },
+    ],
+  },
+  {
+    key: 'databases',
+    title: 'Databases & Storage Engines',
+    category: 'Data Engineering',
+    learningObjective: 'Analyze relational and non-relational database internals: B+ Trees vs LSM Trees, WAL (Write-Ahead Logging), index optimization, and ACID isolation anomalies (Dirty Read, Non-repeatable Read, Phantom Read).',
+    estimatedMinutes: 60,
+    recommendedSkills: ['Databases', 'SQL'],
+    recommendedFollowUpDrillSkill: 'SQL',
+    prompts: [
+      {
+        id: 'db-p1',
+        title: 'B+ Tree vs LSM Tree Storage Internals',
+        scenario: 'You are selecting an underlying storage engine for a time-series telemetry platform with 95% write operations versus a customer billing portal with 90% point-lookup read operations.',
+        challenge: 'Explain how B+ Trees (e.g. InnoDB) optimize random reads and how LSM Trees (e.g. RocksDB, Cassandra) optimize write amplification and sequential writes via MemTable, WAL, and SSTable compaction.',
+        rubric: [
+          { criterion: 'B+ Tree architecture', weight: '35%', description: 'Explains node branching, leaves linked lists for range queries, and random I/O in-place updates.' },
+          { criterion: 'LSM Tree write path', weight: '35%', description: 'Traces sequential append-only WAL, in-memory MemTable, flushed immutable SSTables, and background compaction.' },
+          { criterion: 'Workload alignment', weight: '30%', description: 'Justifies LSM for high write telemetry and B+ Tree for low-latency point read billing.' },
+        ],
+        sampleSolutionOutline: 'B+ Tree performs in-place page updates; reads require O(log_B N) I/O, optimal for point lookups. LSM writes append sequentially to WAL and MemTable (O(1)), flushing to immutable SSTables; reads check MemTable, Bloom filters, and SSTable levels. High-write workloads favor LSM; read-heavy point queries favor B+ Trees.',
+      },
+    ],
+  },
+  {
+    key: 'networks',
+    title: 'Networks & Web Protocols',
+    category: 'Systems Fundamentals',
+    learningObjective: 'Understand the TCP/IP stack, TLS 1.3 handshake, HTTP/1.1 vs HTTP/2 vs HTTP/3 (QUIC), DNS resolution hierarchy, and load balancing algorithms.',
+    estimatedMinutes: 50,
+    recommendedSkills: ['Networks'],
+    recommendedFollowUpDrillSkill: 'Networks',
+    prompts: [
+      {
+        id: 'net-p1',
+        title: 'The Full Lifecycle of a URL Request: Browser to Server',
+        scenario: 'A user types `https://example.com/checkout` and presses Enter in their browser.',
+        challenge: 'Trace the entire end-to-end network sequence: HSTS check, DNS recursive resolution, TCP 3-way handshake, TLS 1.3 cryptographic key exchange, HTTP GET request, and reverse proxy termination.',
+        rubric: [
+          { criterion: 'DNS resolution path', weight: '30%', description: 'Traces browser cache, OS resolver, recursive resolver, root server, TLD server, and authoritative nameserver.' },
+          { criterion: 'Transport & Security handshake', weight: '40%', description: 'Details SYN, SYN-ACK, ACK, plus TLS 1.3 1-RTT ClientHello / ServerHello with ECDHE keys.' },
+          { criterion: 'Application delivery & connection reuse', weight: '30%', description: 'Explains HTTP/2 multiplexed streams or HTTP/3 UDP packets over QUIC.' },
+        ],
+        sampleSolutionOutline: '1. Browser checks cache & HSTS list. 2. DNS query resolves through recursive nameserver to authoritative NS (returns A/AAAA record). 3. TCP SYN / SYN-ACK / ACK. 4. TLS 1.3 handshake with Elliptic Curve Diffie-Hellman (ECDHE). 5. Encrypted HTTP request sent over connection. 6. Load balancer terminates TLS and forwards to backend application server.',
+      },
+    ],
+  },
+  {
+    key: 'behavioral-star',
+    title: 'Behavioral Interviews & STAR Framework',
+    category: 'Interpersonal & Leadership',
+    learningObjective: 'Master the STAR framework (Situation, Task, Action, Result) to communicate engineering impact, cross-functional collaboration, technical disagreements, and ownership.',
+    estimatedMinutes: 45,
+    recommendedSkills: ['Behavioral Communication'],
+    recommendedFollowUpDrillSkill: 'Behavioral Communication',
+    prompts: [
+      {
+        id: 'beh-p1',
+        title: 'Resolving a Technical Conflict with a Senior Peer',
+        scenario: 'Interview prompt: "Tell me about a time you strongly disagreed with a technical design or architectural decision proposed by a team member. How did you resolve it?"',
+        challenge: 'Structure your response using STAR. Emphasize data-driven decision making, prototyping or benchmarking, and disagree-and-commit maturity.',
+        rubric: [
+          { criterion: 'STAR Structure & Clarity', weight: '30%', description: 'Clear narrative arc with crisp Situation and Task without getting bogged down in irrelevant jargon.' },
+          { criterion: 'Action: Data-Driven Resolution', weight: '40%', description: 'Focuses on objective criteria (benchmarks, user requirements, failure proofs) rather than personal ego.' },
+          { criterion: 'Result & Reflection', weight: '30%', description: 'Shares quantifiable outcome, team cohesion maintenance, and key personal takeaway.' },
+        ],
+        sampleSolutionOutline: 'Situation: Proposed microservice architecture vs monolith extension for a new notifications system. Task: Needed to align team before quarterly sprint kickoff. Action: Built a quick proof-of-concept benchmark measuring latency and deployment complexity; facilitated a collaborative tradeoffs matrix. Result: Team chose hybrid approach; shipped on schedule with zero customer downtime. Reflection: Learned that aligning on measurable constraints resolves disputes faster than philosophical debates.',
+      },
+    ],
+  },
+];
