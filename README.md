@@ -1,149 +1,366 @@
-# CareerCircuit
+# CareerCircuit — Enterprise Technical Interview Preparation Platform
 
-> Transparent technical interview preparation, verified employer hiring stages, and honest assessment practice for early-career software engineers.
-
----
-
-## 1. Product Summary
-
-**CareerCircuit** is a free, guest-friendly web platform engineered from scratch for university students, new graduates, and early-career software engineers preparing for technical hiring pipelines.
-
-### Core Principles
-1. **Trust & Evidence Transparency:** Clearly distinguishes authoritative employer disclosures, dated community debriefs, and original simulation practice. Every claim about a hiring stage links directly to a source with last-reviewed recency.
-2. **Honest Scoring:** Never invents correctness, employer cutoffs, or premature mastery claims. Auto-graded verified questions are kept strictly separated from self-reviewed/rubric responses.
-3. **Guest-First & Local Privacy:** 100% of employer research, assessment simulation, preparation planning, and progress tracking runs in the client browser with zero mandatory accounts and no remote tracking cookies.
-4. **Resilient Data Mobility:** Full JSON export and schema-validated import (powered by Zod) allowing seamless cross-device migration with atomic merge or replace modes.
-5. **Focused Editorial Design:** Built with a refined research aesthetic, calm assessment workspace, accessible typography, high-contrast mode, and reduced-motion support.
+[![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](package.json)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6.svg?logo=typescript&logoColor=white)](tsconfig.json)
+[![React](https://img.shields.io/badge/React-19.x-61DAFB.svg?logo=react&logoColor=black)](src/App.tsx)
+[![Vite](https://img.shields.io/badge/Vite-8.x-646CFF.svg?logo=vite&logoColor=white)](vite.config.ts)
+[![Tests](https://img.shields.io/badge/tests-32%20passed-success.svg)](src/test)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
 ---
 
-## 2. Quickstart & Local Installation
+## 1. Executive Summary & Product Overview
 
-### Prerequisites
-- **Node.js**: v18.0.0 or later (tested on v22.14.0)
-- **npm**: v9.0.0 or later
+**CareerCircuit** is an enterprise-grade, guest-first preparation platform designed for university students, new graduates, and early-career software engineers preparing for rigorous technical recruitment processes.
 
-### Setup Commands
+In standard commercial preparation portals, hiring statistics are frequently invented, candidate scores are inflated through fake auto-evaluators, and proprietary recruitment stages are presented without attribution. **CareerCircuit** solves this problem through an **editorial research architecture** and **statistically honest scoring engine**:
 
-```bash
-# 1. Navigate to the project directory
-cd career-circuit
+- **Evidence Traceability:** Every statement regarding employer hiring stages, technical screening formats, and round durations is backed by traceable primary sources (official engineering documentation, corporate disclosures, or dated candidate debriefs) with explicit uncertainty warnings.
+- **Honest Scoring Discipline:** Automatically verified points are strictly decoupled from subjective or self-reviewed items. Code execution never employs insecure browser shortcuts (`eval()` / `new Function()`) and never awards full marks simply because code was submitted.
+- **Client-First Privacy:** Full employer research, practice assessments, personalized study plans, and diagnostic analytics operate 100% offline within the client browser. No mandatory registration, tracking pixels, or third-party analytics cookies.
+- **Resilient Data Interoperability:** Implements schema-versioned JSON backup and restore with atomic Zod validation, offering candidates seamless migration across devices.
 
-# 2. Install dependencies
-npm install
+---
 
-# 3. Start local development server
-npm run dev
+## 2. System Architecture & High-Level Design (HLD)
+
+The application adheres to clean architectural separation between presentation, domain rules, state persistence, and external service adapters:
+
+```mermaid
+graph TD
+    subgraph PresentationLayer["Presentation Layer (React 19 + TypeScript)"]
+        UI_Shell["App Shell & Navigation<br/>(Header, Command Palette, Breadcrumbs)"]
+        Pages["Feature Views<br/>(Dashboard, Directory, Simulator, Results, Drills, Settings)"]
+        DesignTokens["Editorial Design System<br/>(CSS Variables, High-Contrast, Dark/Light Themes)"]
+    end
+
+    subgraph DomainLayer["Domain Layer (Pure Business Logic)"]
+        ScoringEngine["Scoring Engine<br/>(Normalizers, Auto-Grade vs Self-Review Decoupling)"]
+        EvidenceModel["Evidence Taxonomy<br/>(Official, Community, Original Practice, Unknown)"]
+        PlanGenerator["Preparation Plan Generator<br/>(Deterministic Weekly Scheduling with Rationales)"]
+        AnalyticsEngine["Statistical Analytics<br/>(Sample-size Reliability Thresholds)"]
+    end
+
+    subgraph DataPersistence["Data & Persistence Layer"]
+        SeedData["Structured Seed Datasets<br/>(Employers, Question Bank, Assessments, Modules)"]
+        StorageService["Local Storage & IndexedDB Adapter<br/>(Reactive Event Subscriptions & Migrations)"]
+        ZodValidator["Schema Validation Engine<br/>(Atomic Import Validation with Zod)"]
+    end
+
+    subgraph IntegrationBoundaries["External Integration Boundaries (Configurable)"]
+        SandboxAdapter["Code Execution Client Adapter<br/>(Isolated Docker/Judge0 Boundary: 2s CPU, 128MB RAM)"]
+        SyncAdapter["Cloud Sync Protocol Adapter<br/>(Guest Local-First with Optional Remote Endpoint)"]
+    end
+
+    UI_Shell --> Pages
+    Pages --> ScoringEngine
+    Pages --> PlanGenerator
+    Pages --> AnalyticsEngine
+    Pages --> StorageService
+    StorageService --> ZodValidator
+    Pages --> SeedData
+    ScoringEngine --> SandboxAdapter
+    StorageService --> SyncAdapter
 ```
 
-The application will be live at `http://localhost:5173`.
+### Architectural Principles
+1. **Separation of Concerns:** Business logic (scoring derivations, plan generation, confidence calculations) resides entirely in pure functions under `src/domain/` with 0% UI coupling.
+2. **Defensive Validation:** All incoming data—whether route params, user input, or imported JSON files—is validated at boundary entry points using strict typing and runtime schemas.
+3. **Reactive Local State:** Local persistence implements a pub-sub subscription model (`subscribeToStorage`), ensuring that cross-component data updates (bookmarks, plan completion, attempt records) immediately re-render connected views without full-page reloads.
 
-### Running Production Build & Preview
+---
+
+## 3. Core Functional Capabilities
+
+### 3.1 Employer Research & Evidence Matrix
+- **Directory Search & Multi-Faceted Filters:** Search by company name, aliases (e.g., `Stripe Payments`, `DatadogHQ`), engineering hubs, or programming stacks. Filter simultaneously by category, role level, location, and evidence category.
+- **Sequenced Stage Timelines:** Visual progression through recruiter screen, online assessments, technical phone screening, system design onsite, and managerial rounds.
+- **Evidence Confidence Ratings:**
+  - 🟢 **Official Source:** Primary documentation from corporate careers portals or engineering blogs.
+  - 🟡 **Community Reported:** Aggregated student debriefs and candidate forum reports; regional variations highlighted.
+  - 🔵 **Original Practice:** Handcrafted simulator material designed for skill reinforcement.
+  - ⚪ **Unknown / Unverified:** Insufficient public verification; candidates advised not to assume standardized formats.
+- **Side-by-Side Comparison:** Compare up to 4 employers across role tracks, engineering hubs, stage counts, and review recency in a responsive tabular view.
+
+### 3.2 Assessment Simulator & Honest Scoring
+- **Supported Question Formats:**
+  1. *Single-Choice MCQ:* Tested with exact option keys.
+  2. *Multi-Select MCQ:* Evaluated against complete matching answer sets.
+  3. *Short Answer:* Auto-normalized for whitespace, punctuation, and case-insensitivity against accepted variant lists.
+  4. *Complexity Analysis:* Big-O derivations for algorithmic recurrences.
+  5. *Debugging:* Multi-branch bug identification with worked edge-case explanations.
+  6. *Output Prediction:* Asynchronous event loop microtask vs. macrotask ordering.
+  7. *SQL Formulation:* Relational query evaluation against schema fixtures and expected result sets.
+  8. *Coding:* Algorithmic implementation with visible and hidden test specifications.
+  9. *Written Response:* Structured evaluation against rubric criteria.
+- **Simulation Modes:**
+  - **Timed Simulation:** Enforces strict countdown timer with warnings at `< 5m` and automatic submission upon expiration.
+  - **Untimed Practice:** Elapsed timer designed for deep conceptual study.
+- **Autosave & Session Recovery:** In-progress answers are autosaved on every input change; browser refreshes restore the exact question and answer state seamlessly.
+- **Submission Guard:** Review modal lists answered, unanswered, and flagged questions with double confirmation to prevent accidental submission.
+
+### 3.3 Personalized Preparation Plans
+- **Explainable Recommendation Engine:** Generates weekly milestones based on target role, hiring pipeline track (campus recruitment, internship, off-campus, experienced lateral), priority technical competencies, and available weekly study hours.
+- **Transparent Rationales:** Every suggested task states explicitly why it was recommended (e.g., *"Suggested because you selected Concurrency and target date is in 4 weeks"*).
+- **Roadmap Management:** Add custom study goals, reorder milestones, skip tasks, or regenerate the plan at any time.
+
+### 3.4 Interactive Interview Prep Modules
+Seven dedicated modules covering high-frequency engineering interview topics:
+1. **Algorithms & Data Structures:** Two-heap median streaming, 3-color cycle detection.
+2. **System Design & High-Level Architecture:** Distributed sliding-window rate limiters, multi-region latency.
+3. **Low-Level Design (LLD) & OOP:** Strategy pattern parking fee engines, concurrency locks.
+4. **Operating Systems & Concurrency:** Coffman deadlock conditions, global resource hierarchy.
+5. **Databases & Storage Internals:** B+ Trees vs. LSM Trees, WAL, and compaction trade-offs.
+6. **Networks & Web Protocols:** URL lifecycle, TCP 3-way handshake, TLS 1.3 ECDHE, HTTP/3 QUIC.
+7. **Behavioral Interviews (STAR Framework):** Structured technical conflict resolution, data-driven disagreement.
+
+Each module includes scenario prompts, candidate note-taking (autosaved locally), structured self-review rubrics, and reference solution outlines.
+
+### 3.5 Statistical Integrity & Analytics
+- **Sample Size Thresholds:** Skill accuracy percentages are accompanied by explicit attempt counts (e.g., `4 / 5 correct (80%)`).
+- **No False Mastery Claims:** Skills with fewer than 5 attempts are flagged as *Insufficient Data*. A rating of *Proficient* strictly requires `≥ 10` verified attempts with `≥ 80%` accuracy.
+- **Verified Metrics Only:** Only auto-graded objective questions contribute to statistical accuracy; self-reviewed items are kept in an independent summary.
+
+---
+
+## 4. Technology Stack & Key Dependencies
+
+| Layer | Technology | Version | Rationale / IT Standards |
+| :--- | :--- | :--- | :--- |
+| **Language** | TypeScript | `~6.0.2` | Full static type safety with strict mode enabled. |
+| **UI Framework** | React | `^19.3.1` | Component-driven declarative UI. |
+| **DOM Engine** | React DOM | `^19.3.1` | Concurrent root rendering. |
+| **Routing** | React Router DOM | `^7.18.4` | Client-side routing with direct URL parameter synchronization. |
+| **Schema Validation** | Zod | `^4.6.7` | Runtime data validation for backup files and service boundaries. |
+| **Design Tokens** | Custom CSS Variables | N/A | High-craft research aesthetic; zero third-party UI framework bloat. |
+| **Icons** | Lucide React | `^1.59.0` | Clean, accessible SVG iconography. |
+| **Bundler & Server** | Vite | `^8.3.0` | Blazing-fast HMR and optimized Rolldown production chunking. |
+| **Test Runner** | Vitest | `^5.0.5` | Fast ESM-native unit & integration test runner. |
+| **DOM Testing** | Testing Library | `^16.3.3` | User-centric accessible component testing. |
+| **DOM Matchers** | Jest DOM (Vitest) | `^7.0.1` | Semantic assertions for headless DOM testing. |
+
+---
+
+## 5. Codebase Directory Structure
+
+```text
+career-circuit/
+├── .gitignore                     # Git ignore rules for node_modules, build artifacts, envs
+├── index.html                     # HTML5 entry template with font links and root container
+├── package.json                   # NPM manifest with dependencies, scripts, and engine specs
+├── tsconfig.json                  # TypeScript compiler options (strict, bundler resolution)
+├── vite.config.ts                 # Vite & Vitest configuration with manual vendor chunking
+├── README.md                      # Enterprise product documentation
+├── src/
+│   ├── main.tsx                   # React root mount entry point
+│   ├── App.tsx                    # Top-level routing, layout shell, scroll restoration
+│   ├── vite-env.d.ts              # Vite client type definitions
+│   │
+│   ├── types/                     # Core Domain Types & Interfaces
+│   │   └── index.ts               # Employer, Question, Assessment, Plan, and Backup types
+│   │
+│   ├── domain/                    # Pure Domain Business Logic
+│   │   ├── scoring.ts             # Normalization, question evaluators, results aggregation
+│   │   ├── evidence.ts            # Evidence categorization metadata, confidence rankings
+│   │   ├── planGenerator.ts       # Deterministic study plan generation algorithms
+│   │   └── analytics.ts           # Statistical confidence & sample-count calculation
+│   │
+│   ├── data/                      # Sourced Seed Datasets & Accessors
+│   │   ├── seedEmployers.ts       # Documented employer profiles, stages, and source URLs
+│   │   ├── seedQuestions.ts       # Question bank covering all 9 question types
+│   │   ├── seedAssessments.ts     # Pre-built diagnostic simulations
+│   │   ├── seedInterviewModules.ts# 7 interactive interview prep modules with rubrics
+│   │   └── index.ts               # Unified search, filter, and lookup query methods
+│   │
+│   ├── storage/                   # Persistence Layer & Schema Validation
+│   │   ├── backupSchema.ts        # Zod validation schema for versioned import/export
+│   │   └── localStorageService.ts # LocalStorage/IndexedDB abstraction with pub-sub events
+│   │
+│   ├── services/                  # Integration Boundary Adapters
+│   │   ├── codeExecutionService.ts# Remote execution client boundary & security docs
+│   │   └── syncService.ts         # Cloud sync adapter with guest local status
+│   │
+│   ├── components/                # Presentation Components
+│   │   └── common/
+│   │       ├── Header.tsx         # Primary navigation, search trigger, theme switcher
+│   │       ├── Footer.tsx         # Legal, evidence disclosures, privacy statements
+│   │       ├── CommandPalette.tsx # Global keyboard search modal (Ctrl/Cmd + K)
+│   │       ├── ConfirmDialog.tsx  # Accessible modal for destructive confirmations
+│   │       ├── EmptyState.tsx     # Standardized empty state with recovery CTAs
+│   │       ├── EvidenceBadge.tsx  # Accessible evidence badge with tooltips
+│   │       └── SyncStatusModal.tsx# Local storage privacy & architecture disclosure
+│   │
+│   ├── pages/                     # Feature Views
+│   │   ├── DashboardPage.tsx      # Overview, next activity banner, resumable alert
+│   │   ├── CompaniesPage.tsx      # Employer directory, multi-filters, comparison bar
+│   │   ├── CompanyDetailPage.tsx  # Profile, stages timeline, source citations
+│   │   ├── CompanyComparePage.tsx # Side-by-side comparison table (up to 4 companies)
+│   │   ├── PracticePage.tsx       # Assessment catalog and drill launcher
+│   │   ├── AssessmentBriefingPage.tsx # Pre-assessment briefing and mode picker
+│   │   ├── AssessmentSimulatorPage.tsx # Active assessment interface with autosave
+│   │   ├── AssessmentResultsPage.tsx # Score report, question breakdown, drill links
+│   │   ├── DrillsPage.tsx         # Focused practice with progressive hints
+│   │   ├── InterviewPrepPage.tsx  # Catalog of 7 interactive interview modules
+│   │   ├── InterviewPrepModulePage.tsx # Detailed module workspace with notes and rubrics
+│   │   ├── OnboardingPage.tsx     # Multi-step customizable plan generator
+│   │   ├── PreparationPlanPage.tsx# Editable weekly schedule and custom task manager
+│   │   ├── ProgressPage.tsx       # Historical attempts archive and skill accuracy
+│   │   ├── SettingsPage.tsx       # Data export/import, reset, accessibility controls
+│   │   └── NotFoundPage.tsx       # 404 page with breadcrumbs and search recovery
+│   │
+│   ├── styles/                    # Stylesheet Tokens
+│   │   ├── theme.css              # Design tokens, dark mode, high contrast, reduced motion
+│   │   └── components.css         # Component surfaces, layout grids, modal styles
+│   │
+│   └── test/                      # Automated Verification Test Suites
+│       ├── setup.ts               # Test environment setup, headless matchMedia mock
+│       ├── scoring.test.ts        # Unit tests for scoring rules & non-awarding behavior
+│       ├── analytics.test.ts      # Statistical confidence & sample-count tests
+│       ├── employerSearch.test.ts # Search, alias resolution, and multi-filter tests
+│       ├── simulator.test.ts      # Active session recovery & submission tests
+│       ├── planGenerator.test.ts  # Plan creation, duration derivation, task edit tests
+│       ├── backupValidation.test.ts # Zod schema validation & import atomicity tests
+│       └── navigation.test.tsx    # Accessible UI rendering & XSS prevention tests
+```
+
+---
+
+## 6. Getting Started & Operational Runbook
+
+### 6.1 Prerequisites
+Ensure your workstation has:
+- **Node.js**: `v18.0.0` or higher (`v22.14.0` recommended)
+- **NPM**: `v9.0.0` or higher
+
+Verify your environment:
+```bash
+node -v
+npm -v
+```
+
+### 6.2 Installation
 
 ```bash
-# Build optimized production bundle with TypeScript checks
-npm run build
+# Clone or navigate to the project directory
+cd "C:\Users\girijanayak\.vscode\career-circuit"
 
-# Preview production build locally
+# Install dependencies cleanly
+npm install
+```
+
+### 6.3 Local Development Server
+
+```bash
+npm run dev
+```
+Starts the Vite dev server (typically at `http://localhost:5173`). Features instant Hot Module Replacement (HMR).
+
+### 6.4 Running Automated Verification Tests
+
+```bash
+npm test
+```
+Executes all 32 tests using Vitest in headless JSDOM mode.
+
+### 6.5 Production Build & Verification
+
+```bash
+npm run build
+```
+Executes TypeScript type checking (`tsc --noEmit`) followed by optimized production bundling with Vite/Rolldown.
+
+Output bundles are placed in `dist/`:
+- `dist/index.html` (~1.1 kB)
+- `dist/assets/index-*.css` (~9.1 kB)
+- `dist/assets/index-*.js` (~233 kB / ~53 kB gzipped)
+- `dist/assets/vendor-*.js` (~364 kB / ~113 kB gzipped)
+
+To preview the production build locally:
+```bash
 npm run preview
 ```
 
-### Running Automated Test Suite
+---
 
-```bash
-# Run all Vitest unit and integration test suites
-npm test
-```
+## 7. Security, Privacy & Compliance Policies
+
+### 7.1 Client-Side Code Execution Safeguard
+- **Zero Insecure Execution:** Candidate code is **NEVER** executed using `eval()`, `new Function()`, or uncontained Web Workers.
+- **Honest Fallback Mode:** When an isolated execution microservice is not configured, coding questions are explicitly designated as `self_review` / `ungraded`. The system provides visible test cases, expected inputs/outputs, and reference solutions, requiring the candidate to grade their own implementation. Full marks are never automatically awarded for simply entering code.
+
+### 7.2 Remote Code Execution Boundary (Optional Enterprise Backend)
+If configured in `Settings > Integration Boundaries`, the client delegates code execution to a separate containerized endpoint:
+- **Protocol:** `POST /evaluate`
+- **Payload:** `{ questionId: string, language: string, sourceCode: string }`
+- **Required Container Sandbox Constraints:**
+  - CPU timeout: `≤ 2000ms`
+  - Memory limit: `≤ 128MB`
+  - Process limit: `1`
+  - Network: Completely disabled (`iptables -P OUTPUT DROP`)
+  - Filesystem: Read-only root with temporary `/tmp` tmpfs
+  - Protection: Hidden test cases and benchmark keys remain exclusively on the server and are never delivered to the client.
+
+### 7.3 Data Privacy & Zero Telemetry
+- **Local-First Architecture:** 100% of candidate answers, personal notes, bookmarked companies, and diagnostic attempts are stored exclusively in the client's `localStorage` / `IndexedDB`.
+- **No Third-Party Tracking:** No Google Analytics, Segment, Facebook Pixels, or telemetry beacons are embedded.
+- **Cross-Site Scripting (XSS) Prevention:** All imported text, candidate notes, and external strings are rendered strictly through React DOM text nodes. No `dangerouslySetInnerHTML` is used for user or imported data.
 
 ---
 
-## 3. Implemented Routes & User Journeys
+## 8. Data Schema & Backup Interoperability
 
-| Route | Feature & Purpose |
-| :--- | :--- |
-| `/` | **Dashboard:** Next recommended activity, resumable session alert, plan progress, recent attempts, and honest skill trends with sample counts. |
-| `/companies` | **Employer Directory:** Multi-faceted search & filter by category, role level, location, evidence category, and recency. Includes side-by-side comparison selection. |
-| `/companies/:id` | **Employer Profile:** Sequenced hiring stages timeline, engineering hubs, tech stacks, evidence badges, uncertainty notes, and verified source citations. |
-| `/compare` | **Side-by-Side Comparison:** Compares up to 4 employers across locations, tracks, stages, review dates, and evidence ratings. |
-| `/practice` | **Assessment Catalog:** Diagnostic tests and simulations filterable by skill, difficulty, and employer association. |
-| `/practice/:id/briefing` | **Pre-Assessment Briefing:** Question count, breakdown of auto-graded vs self-reviewed items, evidence disclosure, and timed vs untimed mode selector. |
-| `/practice/:id/session` | **Assessment Simulator:** Full testing workspace with question picker, countdown timer with auto-submit, autosave to local storage, review drawer, and confirmation modal. |
-| `/practice/:id/results/:attemptId` | **Results & Diagnostic Report:** Distinct auto-graded verified score vs self-reviewed rubric evaluation, question-by-question breakdown, and 1-click drill launch. |
-| `/practice/drills` | **Targeted Skill Drills:** Focused practice by skill or missed questions with progressive hint disclosure (Hint 1, Hint 2, Worked Solution). |
-| `/interview-prep` | **Interview Preparation Catalog:** 7 interactive modules covering Algorithms & DS, System Design, LLD, OS, Databases, Networks, and Behavioral STAR. |
-| `/interview-prep/:moduleKey` | **Interview Module Workspace:** Interactive scenario prompts, structured self-review rubrics, reference solutions, and autosaved candidate notes. |
-| `/onboarding` | **Preparation Plan Generator:** Optional, skippable onboarding wizard generating weekly milestones with explainable task rationales. |
-| `/plan` | **Roadmap Schedule:** View, reorder, skip, complete, and add custom study goals. |
-| `/progress` | **Progress & Accuracy:** Comprehensive attempt history archive and honest skill accuracy breakdown with sample size reliability thresholds. |
-| `/settings` | **Settings & Data Management:** JSON backup export, Zod-validated import, local data reset, theme toggle, and optional service configurations. |
-| `*` | **Not Found (404):** Error recovery page with direct breadcrumbs and search links. |
+CareerCircuit implements a strict **JSON export and import contract** (`schemaVersion: 1`) enforced via **Zod**:
+
+```json
+{
+  "schemaVersion": 1,
+  "appVersion": "1.0.0",
+  "exportedAt": "2026-10-17T22:00:00.000Z",
+  "preferences": {
+    "theme": "system",
+    "highContrast": false,
+    "reducedMotion": false,
+    "fontSize": "standard",
+    "remoteEvaluatorUrl": "",
+    "remoteSyncUrl": ""
+  },
+  "bookmarkedEmployerIds": ["emp-stripe", "emp-datadog"],
+  "comparedEmployerIds": ["emp-stripe", "emp-bloomberg"],
+  "preparationPlan": {
+    "id": "plan_abc123",
+    "createdAt": "2026-10-17T20:00:00.000Z",
+    "updatedAt": "2026-10-17T20:00:00.000Z",
+    "targetRole": "Backend Software Engineer",
+    "hiringTrack": "campus",
+    "targetEmployerIds": ["emp-stripe"],
+    "skillLevel": "intermediate",
+    "focusSkills": ["Algorithms", "SQL"],
+    "weeklyHours": 10,
+    "weeklyGoals": [...]
+  },
+  "assessmentAttempts": [...],
+  "interviewProgress": {...},
+  "drillStats": {
+    "Algorithms": { "attempts": 12, "correct": 10 },
+    "SQL": { "attempts": 8, "correct": 7 }
+  }
+}
+```
+
+### Import Atomicity
+- When importing a JSON backup, the file is validated in its entirety before any state mutations occur.
+- If a single schema error or malformed property is detected, the operation aborts immediately with a descriptive error path (e.g., `preferences.theme: Invalid enum value`), leaving existing user data 100% intact.
+- Candidates choose between:
+  - **Merge:** Unions bookmarks and attempts without deleting existing history.
+  - **Replace:** Atomically overwrites the workspace with the backup contents.
 
 ---
 
-## 4. Architecture & Technical Decisions
+## 9. Test & Verification Report
 
-```
-career-circuit/
-├── src/
-│   ├── types/                     # Core TypeScript domain models & backup schemas
-│   ├── domain/                    # Pure domain logic (scoring, evidence taxonomy, plan generator, analytics)
-│   │   ├── scoring.ts             # Honest scoring engine distinguishing auto vs self-review
-│   │   ├── evidence.ts            # Evidence categories metadata, descriptions, badges
-│   │   ├── planGenerator.ts       # Deterministic, explainable preparation plan builder
-│   │   └── analytics.ts           # Statistical confidence & sample-count calculation
-│   ├── data/                      # Structured high-quality seed datasets
-│   │   ├── seedEmployers.ts       # Sourced employer profiles (Stripe, Datadog, Bloomberg, etc.)
-│   │   ├── seedQuestions.ts       # Question bank covering all 9 question types
-│   │   ├── seedAssessments.ts     # Curated diagnostic simulations
-│   │   ├── seedInterviewModules.ts# 7 interactive interview prep modules with rubrics
-│   │   └── index.ts               # Unified data access and search query interface
-│   ├── storage/                   # Local-first persistence & validation
-│   │   ├── backupSchema.ts        # Strict Zod schema for versioned import/export
-│   │   └── localStorageService.ts # LocalStorage/IndexedDB abstraction with reactive subscriptions
-│   ├── services/                  # Typed integration boundaries
-│   │   ├── codeExecutionService.ts# Isolated code execution client boundary & security docs
-│   │   └── syncService.ts         # Optional cloud sync adapter with local guest status
-│   ├── components/                # Accessible design system components
-│   │   └── common/                # Header, Footer, EvidenceBadge, CommandPalette, ConfirmDialog, etc.
-│   ├── pages/                     # Product feature views
-│   ├── styles/                    # Editorial design system tokens, themes, high-contrast, motion
-│   └── test/                      # Vitest & Testing Library automated test suite
-```
-
-### Evidence Categorization Taxonomy
-- **Official Source:** Verified directly via official employer documentation, company engineering blogs, or verified recruiter communications.
-- **Community Reported:** Aggregated candidate debriefs, forum reports, and community compilations. Subject to regional and seasonal variations.
-- **Original Practice:** Material developed specifically for CareerCircuit to evaluate real-world computer science concepts without claiming to be official or leaked exams.
-- **Unknown / Unverified:** Insufficient public evidence exists. Clearly labeled so candidates never make false assumptions.
-
-### Scoring Model & Security Architecture
-- **Objective Questions (Single-choice, Multi-select, Output Prediction, Complexity Analysis, Debugging):** Automatically verified against explicit answer keys.
-- **Short-Answer Questions:** Normalized (trimmed, internal whitespace collapsed, case-insensitive unless specified) against defined accepted variants.
-- **SQL Questions:** Evaluated against relational schema fixtures and expected result sets; marked as self-review if unverified.
-- **Coding Questions:**
-  - **Security Guarantee:** Candidate code is **NEVER executed using browser `eval()`, `new Function()`, or uncontained workers**.
-  - **Execution Boundary:** When configured, code is submitted to an isolated container service (2s CPU timeout, 128MB RAM limit, 1 process limit, network disabled).
-  - **Honest Fallback:** If no remote execution endpoint is configured, coding questions are explicitly designated as `self_review` / `ungraded`. Full marks are **never** awarded simply because code was typed into the editor.
-- **Written Questions:** Evaluated against structured self-review rubrics.
-
-### Data Validation & Import Atomicity
-- All exported files include `schemaVersion: 1`, `appVersion: "1.0.0"`, and an ISO export timestamp.
-- The entire backup is parsed through a strict **Zod** schema (`UserDataBackupSchema`) before applying any state changes.
-- If validation fails, the current workspace is left completely untouched (atomic failure protection).
-- Supports both **Merge** (union of bookmarks and attempts) and **Replace** (full restore).
-
----
-
-## 5. Verification & Test Report
-
-All 32 automated tests pass across 7 dedicated test suites:
+Automated tests are executed via `npm test` with 100% passing results:
 
 ```text
-✓ src/test/analytics.test.ts (3 tests)
-  - returns empty array when there are no submitted attempts
-  - marks skills with fewer than 5 attempts as Insufficient Data to prevent false mastery
-  - marks skills with >= 10 attempts and >= 80% as Proficient
-
 ✓ src/test/scoring.test.ts (6 tests)
   - normalizes short answers by trimming, collapsing spaces, and lowercasing
   - correctly scores single_choice questions with exact match
@@ -151,6 +368,11 @@ All 32 automated tests pass across 7 dedicated test suites:
   - correctly scores short_answer against accepted variants with normalization
   - never automatically awards full marks for coding questions without a secure evaluator
   - maintains strict separation between auto-graded and self-reviewed points in aggregate results
+
+✓ src/test/analytics.test.ts (3 tests)
+  - returns empty array when there are no submitted attempts
+  - marks skills with fewer than 5 attempts as Insufficient Data to prevent false mastery
+  - marks skills with >= 10 attempts and >= 80% as Proficient
 
 ✓ src/test/employerSearch.test.ts (7 tests)
   - returns all employers when query and filters are empty
@@ -184,28 +406,27 @@ All 32 automated tests pass across 7 dedicated test suites:
   - renders community reported evidence badge with warning descriptor
   - renders NotFoundPage with clear navigation recovery controls
   - safely renders untrusted text in EmptyState as text rather than raw HTML
+
+Test Files:  7 passed (7)
+Tests:       32 passed (32)
 ```
 
 ---
 
-## 6. Optional Services & Credentials
+## 10. Engineering Roadmap & Future Phases
 
-CareerCircuit requires **zero credentials** for complete offline and local usage. The following integration boundaries are defined and ready for optional backend connection in `Settings`:
-
-1. **Isolated Code Evaluator (`/evaluate`):**
-   - Client adapter: `src/services/codeExecutionService.ts`
-   - Configurable in `Settings > Integration Boundaries`.
-   - Compatible with Judge0 or custom Docker microservices.
-   - Defaults to honest self-review mode when unconfigured.
-2. **Cloud Sync Service (`/sync`):**
-   - Client adapter: `src/services/syncService.ts`
-   - Configurable in `Settings > Integration Boundaries`.
-   - Defaults to guest local storage mode when unconfigured.
+1. **In-Browser WebAssembly SQLite Engine (`sql.js`):**
+   - *Phase:* v1.1
+   - *Scope:* Bundle SQLite compiled to WASM to allow candidate SQL queries to run client-side against in-memory schemas, providing automated relational query validation with zero backend infrastructure.
+2. **Interactive Architectural Whiteboard:**
+   - *Phase:* v1.2
+   - *Scope:* Add an accessible, canvas-based block-diagramming tool for System Design and LLD interview modules to accompany textual notes.
+3. **Spaced Repetition Review Engine (SM-2):**
+   - *Phase:* v1.3
+   - *Scope:* Implement an algorithmic spaced repetition scheduler for questions candidates previously missed or flagged for review.
 
 ---
 
-## 7. Recommended Next Improvements
+## 11. License & Operational Governance
 
-1. **In-Browser WebAssembly SQLite Engine:** Integrate `sql.js` (SQLite compiled to WASM) to execute candidate SQL queries in an in-memory client database against real schema fixtures without needing an external backend.
-2. **Interactive System Architecture Canvas:** Provide a lightweight, keyboard-accessible block-diagram drawing tool for system design prompts to complement candidate text notes.
-3. **Spaced Repetition Flash Drills:** Implement an SM-2 spaced repetition algorithm for questions that candidates previously answered incorrectly or flagged as difficult.
+Licensed under the **MIT License**. Created with guest-first principles, evidence transparency, and honest scoring for the software engineering community.
